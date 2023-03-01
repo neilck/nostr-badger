@@ -9,6 +9,7 @@
     "@mui/material": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "nostr-tools": "^1.7.1",
     "react": "latest",
     "react-dom": "latest",
     "react-router-dom": "^6.8.1",
