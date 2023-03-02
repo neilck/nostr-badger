@@ -9,48 +9,69 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
+import BadgeIcon from '@mui/icons-material/Badge';
+import AddBoxIcon from '@mui/icons-material/AddBox';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import MailIcon from '@mui/icons-material/Mail';
 import { Link } from 'react-router-dom';
 import { Typography } from '@mui/material';
 
 export default function LeftDrawer() {
-    const drawerWidth = 240;
+  const navMap = new Map();
+  navMap.set("", "Nostr Badger");
+  navMap.set("create", "Create Badge");
+  navMap.set("issue", "Issue Badge");
     
-return (
+  const mapIter = navMap.keys();
 
-<Drawer variant="permanent" anchor="left">
-<Toolbar>
-  <Typography variant="h6">Nostr Badger</Typography>
-  </Toolbar>
-<Divider />
-<List>
-  {['Create', 'Issue'].map((text, index) => (
-    <ListItem key={text} disablePadding component={Link} to={`/${text}`} 
-    css={css`
-        color: #000000DE;
-        `}>
-      <ListItemButton>
-        <ListItemIcon>
-          {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-        </ListItemIcon>
-        <ListItemText primary={text} />
-      </ListItemButton>
-    </ListItem>
-  ))}
-</List>
-<Divider />
-<List>
-  {['All mail', 'Trash', 'Spam'].map((text, index) => (
-    <ListItem key={text} disablePadding>
-      <ListItemButton>
-        <ListItemIcon>
-          {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-        </ListItemIcon>
-        <ListItemText primary={text} />
-      </ListItemButton>
-    </ListItem>
-  ))}
-</List>
-</Drawer>
-)};
+  return (
+    <Drawer variant="permanent" anchor="left">
+    <Toolbar>
+      <Typography variant="h6">Nostr Badger</Typography>
+      </Toolbar>
+    <Divider />
+    <List>
+      <ListItem disablePadding component={Link} to={"/badges"} 
+        css={css`color: #000000DE;`}>
+        <ListItemButton>
+          <ListItemIcon>
+            <BadgeIcon />
+          </ListItemIcon>
+          <ListItemText primary="Badges" />
+        </ListItemButton>
+      </ListItem>
+      <ListItem disablePadding component={Link} to={"/create"} 
+        css={css`color: #000000DE;`}>
+        <ListItemButton>
+          <ListItemIcon>
+            <AddBoxIcon />
+          </ListItemIcon>
+          <ListItemText primary="Create Badge" />
+        </ListItemButton>
+      </ListItem>
+      <ListItem disablePadding component={Link} to={"/issue"} 
+        css={css`color: #000000DE;`}>
+        <ListItemButton>
+          <ListItemIcon>
+            <AssignmentIndIcon />
+          </ListItemIcon>
+          <ListItemText primary="Issue Badge" />
+        </ListItemButton>
+      </ListItem>
+    </List>
+    <Divider />
+    <List>
+      {['All mail', 'Trash', 'Spam'].map((text, index) => (
+        <ListItem key={text} disablePadding>
+          <ListItemButton>
+            <ListItemIcon>
+               <MailIcon />
+            </ListItemIcon>
+            <ListItemText primary={text} />
+          </ListItemButton>
+        </ListItem>
+      ))}
+    </List>
+    </Drawer>
+  )
+};

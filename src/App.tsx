@@ -1,4 +1,6 @@
-import * as React from 'react';
+import { useEffect, useState } from 'react'; 
+import { useLocation, Location } from 'react-router-dom';
+
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
 
@@ -8,10 +10,29 @@ import Typography from '@mui/material/Typography';
 import LeftDrawer from './components/LeftDrawer';
 import Create from './components/Create';
 import Issue from './components/Issue';
+import Badges from './components/Badges';
 import { Route, Routes } from 'react-router-dom';
 
+const drawerWidth = 240;
+type Title = {
+  path: string;
+  name: string;
+}
+
+
 export default function App() {
-  const drawerWidth = 240;
+  const titleMap = new Map();
+  titleMap.set("/", "Nostr Badger");
+  titleMap.set("/badges", "Badges");
+  titleMap.set("/create", "Create Badge");
+  titleMap.set("/issue", "Issue Badge");
+  
+  const location = useLocation();
+  const [title, setTitle] = useState(titleMap.get("/"));
+
+  useEffect(() => {
+    setTitle(titleMap.get(location.pathname));
+  }, [location.pathname]);
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -22,7 +43,7 @@ export default function App() {
       >
         <Toolbar>
           <Typography variant="h6" noWrap component="div">
-            Permanent drawer
+            {title}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -45,8 +66,9 @@ export default function App() {
         <Toolbar />
 
       <Routes>
-        <Route path="Create" element={<Create />} />
-        <Route path="Issue" element={<Issue />} />
+        <Route path="create" element={<Create />} />
+        <Route path="issue" element={<Issue />} />
+        <Route path="badges" element={<Badges />} />
       </Routes>
       </Box>
 
