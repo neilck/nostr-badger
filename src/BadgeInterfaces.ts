@@ -7,7 +7,8 @@ export interface BadgeDefinition {
     image?: string,
     imageDimensions?: string,
     thumb?: string,
-    thumbDimensions?: string
+    thumbDimensions?: string,
+    content?: string
 }
 
 export interface Recipient {

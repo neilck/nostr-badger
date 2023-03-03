@@ -119,16 +119,6 @@ export default function Create()
 
     const createEvent = async () =>
     {
-        // let nEvent: nostr.Event = {
-        // kind: 1,
-        // created_at: Math.floor(Date.now() / 1000),
-        // tags: [],
-        // content: 'hello',
-        // pubkey: publicKey,
-        // id: "",
-        // sig: ""
-        // }
-
         let nEvent: nostr.Event = {
             kind: 30009,
             created_at: Math.floor(Date.now() / 1000),
@@ -202,7 +192,7 @@ export default function Create()
                 <Grid item xs={12} sm={4}>
                     <TextField
                         required
-                        id="unqiueName"
+                        id="uniqueName"
                         label="Unique Name"
                         fullWidth
                         variant="standard"
