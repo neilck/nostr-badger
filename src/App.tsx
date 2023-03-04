@@ -11,6 +11,7 @@ import LeftDrawer from './components/LeftDrawer';
 import Create from './components/Create';
 import Issue from './components/Issue';
 import Badges from './components/Badges';
+import ImageSelect from './components/ImageSelect';
 import { Route, Routes } from 'react-router-dom';
 
 const drawerWidth = 240;
@@ -26,6 +27,7 @@ export default function App() {
   titleMap.set("/badges", "Badges");
   titleMap.set("/create", "Create Badge");
   titleMap.set("/issue", "Issue Badge");
+  titleMap.set("/imageselect", "Image Select");
   
   const location = useLocation();
   const [title, setTitle] = useState(titleMap.get("/"));
@@ -69,6 +71,7 @@ export default function App() {
         <Route path="create" element={<Create />} />
         <Route path="issue" element={<Issue />} />
         <Route path="badges" element={<Badges />} />
+        <Route path="imageselect" element={<ImageSelect />} />
       </Routes>
       </Box>
 

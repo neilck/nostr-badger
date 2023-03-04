@@ -1,4 +1,4 @@
-import { Typography, Grid, TextField, Button } from '@mui/material';
+import { Typography, Grid, TextField, Button, Card, CardMedia, CardContent, CardActions, Box } from '@mui/material';
 import { BadgeDefinition } from '../BadgeInterfaces';
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -149,11 +149,45 @@ export default function Badges()
                 
             </Grid>
             <Button onClick={getBadges}>Get Badges</Button>
-            { badges.map( (value: BadgeDefinition, index: number, array: BadgeDefinition[]) =>
-            (
-                <Typography key={index}>{value.id}</Typography>
-            )
-            )}
+        
+            <Grid container spacing={4}>
+                {badges.map( (badge: BadgeDefinition, index: number, array: BadgeDefinition[]) => (
+                <Grid item key={index} xs={12} sm={6} md={4}>
+                    <Card
+                    sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+                    >
+                        <Box m={1}>
+                            <Typography variant="subtitle2">
+                            {badge.uniqueName}
+                            </Typography>
+                        </Box>
+                    
+                    <CardMedia
+                        component="img"
+                        sx={{
+                        // 16:9
+                        pt: '56.25%',
+                        }}
+                        image={badge.image}
+                        alt="badge image"
+                    />
+                    <CardContent sx={{ flexGrow: 1 }}>
+                        <Typography gutterBottom variant="h5" component="h2">
+                        {badge.name}
+                        </Typography>
+                        <Typography>
+                        {badge.description}
+                        </Typography>
+                        
+                    </CardContent>
+                    <CardActions>
+                        <Button size="small">View</Button>
+                        <Button size="small">Edit</Button>
+                    </CardActions>
+                    </Card>
+                </Grid>
+                ))}
+            </Grid>
         </React.Fragment>        
     )
 }
