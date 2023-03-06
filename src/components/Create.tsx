@@ -1,7 +1,9 @@
-import { Typography, Grid, TextField, Button } from '@mui/material';
-
+import { Typography, Grid, TextField, Button, Box, Card, CardMedia, CardActionArea } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import React, { useEffect, useState, useRef } from 'react';
+import ImageSelect from './ImageSelect';
 import * as nostr from 'nostr-tools';
+import { Container } from '@mui/system';
 
 
 const defaultFormData = {
@@ -10,7 +12,7 @@ const defaultFormData = {
     uniqueName: "",
     name: "",
     description: "",
-    image: "",
+    image: "/images/add.svg",
     imageDimensions: "",
     thumb: "",
     thumbDimensions: ""
@@ -23,11 +25,39 @@ export default function Create()
         return defaultFormData;
     }
 
+    function getBaseUrl(url: string)
+    {
+        const i = url.lastIndexOf("/");
+        if (i > 0)
+            return url.substring(0, i);
+        return url;
+    }
+
     const [formData, setFormData] = useState(initFormData);
     const [privateKey, setPrivateKey] = useState("c58964e1825506d43cff78558d4cd1ac784d7b44da07ce5cb5eac498ba821062");
     const [publicKey, setPublicKey] = useState("43094d0a6b72dd5b294e6ac3abcf4740a1867449330976b0394888cf1bda3819");
     const [isPublished, setIsPublished] = useState(false);
     const [createdAt, setCreatedAt] = useState(0);
+
+    // Dialog
+    const [open, setOpen] = React.useState(false);
+    const [selectedValue, setSelectedValue] = React.useState("");
+    const handleClickOpen = () => {
+        setOpen(true);
+      };
+    
+    const handleClose = (value: string) => {
+    setOpen(false);
+    setSelectedValue(value);
+    setFormData((prevState) => ({
+        ...prevState,
+        image: `${getBaseUrl(window.location.href)}/images/${value}`,
+        imageDimensions: "",
+        thumb: "",
+        thumbDimensions: ""
+
+    }));
+    };
 
     const { id, pubkey, uniqueName, name, description, image, imageDimensions, thumb, thumbDimensions } = formData;
 
@@ -82,13 +112,13 @@ export default function Create()
     {
         setFormData((prevState) => ({
             ...prevState,
-            uniqueName: "badge01",
-            name: "New Badge",
-            description: "My new badge is awesome.",
-            image: "https://nostr.academy/awards/bravery.png",
-            imageDimensions: "1024x1024",
-            thumb: "https://nostr.academy/awards/bravery_256x256.png",
-            thumbDimensions: "256x256"
+            uniqueName: "",
+            name: "",
+            description: "",
+            image: `${getBaseUrl(window.location.href)}/images/add.svg`,
+            imageDimensions: "",
+            thumb: "",
+            thumbDimensions: ""
         }));
     }
 
@@ -163,10 +193,10 @@ export default function Create()
     }
 
     return (
-        <React.Fragment>
-            <Grid container spacing={1}>
+        <Box  display='flex' flexDirection='column' alignItems='center'>
+            <Grid container spacing={1} maxWidth='md'>
                 {id != "" && 
-                <React.Fragment>
+                <>
                 <Grid item xs={12}>
                     <TextField
                         id="id"
@@ -187,9 +217,12 @@ export default function Create()
                         InputProps={{readOnly: true}}
                     />
                 </Grid>
-                </React.Fragment>
+                </>
                 }
-                <Grid item xs={12} sm={4}>
+                <Grid item xs={12}>
+                    <Typography variant='h6'>Badge Text</Typography>
+                </Grid>
+                <Grid item xs={12} sm={3}>
                     <TextField
                         required
                         id="uniqueName"
@@ -201,7 +234,9 @@ export default function Create()
                         helperText={"\"bravery\""}
                     />
                 </Grid>
-                <Grid item xs={12} sm={8}>
+                <Grid item xs={12} sm={9}>
+                </Grid>
+                <Grid item xs={12} sm={4}>
                     <TextField
                         required
                         id="name"
@@ -213,7 +248,7 @@ export default function Create()
                         helperText={"\"Medal of Bravery\""}
                     />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid item xs={12} sm={8}>
                     <TextField
                         required
                         id="description"
@@ -225,57 +260,86 @@ export default function Create()
                         helperText={"\"Awarded to users demonstrating bravery\""}
                     />
                 </Grid>
-                <Grid item xs={12} sm={8}>
-                    <TextField
-                        required
-                        id="image"
-                        label="Image"
-                        fullWidth
-                        variant="standard"
-                        value={image}
-                        onChange={handleChange}
-                        helperText={"\"https://nostr.academy/awards/bravery.png\""}
-                    />
+                <Grid item xs={12}>
+                    <Typography variant='h6'>Badge Image</Typography>
                 </Grid>
-                <Grid item xs={12} sm={4}>
-                    <TextField
-                        required
-                        id="imageDimensions"
-                        label="Image Dimensions"
-                        fullWidth
-                        variant="standard"
-                        value={imageDimensions}
-                        onChange={handleChange}
-                        helperText={"\"1024x1024\""}
-                    />
+                <Grid container spacing={1} columnSpacing={2}>
+                    <Grid item xs={6} sm={2}>
+                        <CardActionArea onClick={handleClickOpen}>
+                            <Card  sx={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#F5F5F5' }} >                      
+                                <CardMedia
+                                    component="img"
+                                    sx={{
+                                        padding: "1em 1em 1em 1em", objectFit: "contain" 
+                                    // 16:9
+                                    // pt: '56.25%',
+                                    }}
+                                    image={ image == "" ? "/images/add.svg" : image }
+                                    alt="badge image"
+                                />
+                            </Card>
+                        </CardActionArea>
+                    </Grid>
+                    <Grid item xs={12} sm={8}>
+                        <TextField
+                            required
+                            id="image"
+                            label="Image URL"
+                            fullWidth
+                            variant="standard"
+                            value={image}
+                            onChange={handleChange}
+                            helperText={"\"https://nostr.academy/awards/bravery.png\""}
+                        />
+                        <Box pt={2}>
+                            <TextField
+                            id="thumb"
+                            label="Thumb URL"
+                            fullWidth
+                            variant="standard"
+                            value={thumb}
+                            onChange={handleChange}
+                            helperText={"\"https://nostr.academy/awards/bravery_256x256.png\""
+                            }
+                            />
+                        </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={2}>
+                        <TextField
+                            id="imageDimensions"
+                            label="Image Dim."
+                            fullWidth
+                            variant="standard"
+                            value={imageDimensions}
+                            onChange={handleChange}
+                            helperText={"\"1024x1024\""}
+                        />
+                        <Box pt={2}>
+                            <TextField
+                                id="thumbDimensions"
+                                label="Thumb Dim."
+                                fullWidth
+                                variant="standard"
+                                value={thumbDimensions}
+                                onChange={handleChange}
+                                helperText={"\"256x256\""}
+                            />
+                        </Box>
+                    </Grid>
                 </Grid>
-                <Grid item xs={12} sm={8}>
-                    <TextField
-                        required
-                        id="thumb"
-                        label="Thumbnail"
-                        fullWidth
-                        variant="standard"
-                        value={thumb}
-                        onChange={handleChange}
-                        helperText={"\"https://nostr.academy/awards/bravery_256x256.png\""}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                    <TextField
-                        required
-                        id="thumbDimensions"
-                        label="Thumbnail Dimensions"
-                        fullWidth
-                        variant="standard"
-                        value={thumbDimensions}
-                        onChange={handleChange}
-                        helperText={"\"256x256\""}
-                    />
+                <Grid item xs={12}>
+                    <Typography variant='h6'>Relays / Key</Typography>
                 </Grid>
             </Grid>
+           
             <Button onClick={testEvent}>Test Event</Button>
             <Button onClick={createEvent}>Create Event</Button>
-        </React.Fragment>        
+            
+            <ImageSelect
+                selectedValue={selectedValue}
+                open={open}
+                onClose={handleClose}
+            />
+        </Box>  
     )
 }

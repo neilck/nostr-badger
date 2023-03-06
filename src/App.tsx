@@ -11,6 +11,7 @@ import LeftDrawer from './components/LeftDrawer';
 import Create from './components/Create';
 import Issue from './components/Issue';
 import Badges from './components/Badges';
+import Test from './components/Test';
 import ImageSelect from './components/ImageSelect';
 import { Route, Routes } from 'react-router-dom';
 
@@ -71,7 +72,7 @@ export default function App() {
         <Route path="create" element={<Create />} />
         <Route path="issue" element={<Issue />} />
         <Route path="badges" element={<Badges />} />
-        <Route path="imageselect" element={<ImageSelect />} />
+        <Route path="test" element={<Test />} />
       </Routes>
       </Box>
 
