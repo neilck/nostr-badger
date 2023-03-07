@@ -1,14 +1,13 @@
 export interface BadgeDefinition {
     id?: string,
-    issuerPubkey?: string,
+    publicKey?: string,
     uniqueName?: string,
     name?: string,
     description?: string,
     image?: string,
     imageDimensions?: string,
     thumb?: string,
-    thumbDimensions?: string,
-    content?: string
+    thumbDimensions?: string
 }
 
 export interface Recipient {

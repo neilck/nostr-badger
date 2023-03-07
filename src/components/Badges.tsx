@@ -100,15 +100,14 @@ export default function Badges()
                 const badge: BadgeDefinition =
                 {
                     id: event.id,
-                    issuerPubkey: event.pubkey,
+                    publicKey: event.pubkey,
                     uniqueName: uniqueName,
                     name: name,
                     description: description,
                     image: image,
                     imageDimensions: imageDimensions,
                     thumb: image,
-                    thumbDimensions: thumbDimensions,
-                    content: event.content
+                    thumbDimensions: thumbDimensions
                 };
 
                 setBadges( (currentState) => [...currentState, badge]);

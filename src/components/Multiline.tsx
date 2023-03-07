@@ -1,15 +1,22 @@
-import { Typography, Grid, TextField, Button, Box, Card, CardMedia, CardActionArea } from '@mui/material';
+import { Typography, Grid, TextField, Button, Box, Card, CardMedia, CardActionArea, TextFieldProps, StandardTextFieldProps } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import React, { useEffect, useState, useRef } from 'react';
 
-interface MultlineProps {
-    lines: string[]
+interface MultlineProps extends StandardTextFieldProps {
+    lines: string[],
+    onTextChange: (lines: string[]) => void 
 }
 
 function arrayToString(lines: string[]): string
 {
     let all = "";
-    lines.map( (line) => all = `${all}\n${line}`)
+    for (let i=0; i<lines.length; i++)
+    {
+        if (i==0) all = lines[0];
+        else all = `${all}\n${lines[i]}` 
+    }
+       
+        
     return all;
 }
 
@@ -18,15 +25,14 @@ function stringToArray(all: string): string[]
     return all.split('\n');
 }
 
-
-export function Multiline(props: MultlineProps)
+export function Multiline({lines, onTextChange, ...rest}: MultlineProps)
 {
-    
-    const [data, setData] = useState([""]);
+    function onChange(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>)
+    {
+        onTextChange(stringToArray(event.target.value));
+    }
 
     return (
-        <TextField multiline>
-            my text
-        </TextField>
+        <TextField multiline onChange={onChange} value={arrayToString(lines)} {...rest} />
     )
 }
