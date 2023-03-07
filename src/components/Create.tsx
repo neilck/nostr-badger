@@ -8,46 +8,36 @@ import { createBadgeEvent } from '../NostrUtil';
 
 const defaultFormData = {
     id: "",
-    pubkey: "",
     uniqueName: "",
     name: "",
     description: "",
-    image: "/images/add.svg",
+    image: `${getBaseUrl(window.location.href)}/images/add.svg`,
     imageDimensions: "",
     thumb: "",
     thumbDimensions: ""
 }
 
+function initFormData()
+{
+    return defaultFormData;
+}
+
+function getBaseUrl(url: string)
+{
+    const i = url.lastIndexOf("/");
+    if (i > 0)
+        return url.substring(0, i);
+    return url;
+}
+
 export default function Create()
 {
-    function initFormData()
-    {
-        return defaultFormData;
-    }
-
-    function getBaseUrl(url: string)
-    {
-        const i = url.lastIndexOf("/");
-        if (i > 0)
-            return url.substring(0, i);
-        return url;
-    }
-
-    const [formData, setFormData] = useState(initFormData);
-
-    const [isPublished, setIsPublished] = useState(false);
-    const [relayURLS, setRelayURLs] = React.useState(["ws://localhost:8008"]);
-
     /***** START Image Selector Dialog *****/
-    const [open, setOpen] = React.useState(false);
+    const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [selectedValue, setSelectedValue] = React.useState("");
-
-    const handleClickOpen = () => {
-        setOpen(true);
-      };
     
-    const handleClose = (value: string) => {
-        setOpen(false);
+    const handleImageSelectClose = (value: string) => {
+        setIsDialogOpen(false);
         setSelectedValue(value);
         setFormData((prevState) => ({
             ...prevState,
@@ -69,14 +59,15 @@ export default function Create()
     }
     /***** END Log *****/
 
-    const { id, pubkey, uniqueName, name, description, image, imageDimensions, thumb, thumbDimensions } = formData;
+    const [formData, setFormData] = useState(initFormData);
+    const { id, uniqueName, name, description, image, imageDimensions, thumb, thumbDimensions } = formData;
     const pool = useRef<nostr.SimplePool | null>(null);
+    const [relayURLS, setRelayURLs] = React.useState(["ws://localhost:8008"]);
     const openRelays = useRef<string[] | null>(null);
 
 
     // first render and cleanup
     useEffect(() => {
-        // loadTest();
         pool.current = new nostr.SimplePool();
         console.log('Pool initialized');
 
@@ -92,35 +83,20 @@ export default function Create()
         }
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    // update state when form field value changes
+    const onTextFieldChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) =>
         setFormData((prevState) => ({
             ...prevState,
             [e.target.id]: e.target.value,
         }));
     ;
 
-    
-    // const loadTest = () =>
-    // {
-    //     setFormData((prevState) => ({
-    //         ...prevState,
-    //         uniqueName: "",
-    //         name: "",
-    //         description: "",
-    //         image: `${getBaseUrl(window.location.href)}/images/add.svg`,
-    //         imageDimensions: "",
-    //         thumb: "",
-    //         thumbDimensions: ""
-    //     }));
-    // }
-
-    const onEventSigned = (event: Event, mesg: string) => {
-
-    }
-
+    // creates event
     const createEvent = async () =>
     {
         setLog('Creating badge...');
+
+        // create event from state values
         const event = createBadgeEvent({
             uniqueName: uniqueName,
             name: name,
@@ -129,11 +105,15 @@ export default function Create()
             imageDimensions: imageDimensions,
             thumb: thumb,
             thumbDimensions: thumbDimensions,
+            // get public key from NIP-07 browser extension
             publicKey: await (window as any).nostr.getPublicKey()
         });
    
+        // calculate event ID
         event.id = nostr.getEventHash(event)        
 
+        // sign event using NIP-07 browser extension
+        // UI prevents this function from being called when window.nostr doesn't exist
         if ((window as any).nostr) {
             let signatureOrEvent = await (window as any).nostr.signEvent(event)
             switch (typeof signatureOrEvent) {
@@ -150,6 +130,7 @@ export default function Create()
             }
         }
 
+        // double check all good
         let ok = nostr.validateEvent(event);
         let veryOk = nostr.verifySignature(event);
         if (!ok || !veryOk)
@@ -158,10 +139,12 @@ export default function Create()
             return;
         }
 
-        appendLog(`About to send event with id ${event.id.substring(0,10)}...`);
+        appendLog(`About to send event with id: ${event.id.substring(0,10)}...`);
 
+        // send event to relays
         if (pool.current && relayURLS && relayURLS.length > 0)
         {
+            // relayURLs from multiline component may have empty lines
             const goodURLs = new Array<string>();
             for (let i=0; i<relayURLS.length; i++)
             {
@@ -175,6 +158,8 @@ export default function Create()
                 return;
             }
 
+            // pool.current.publish sometimes tries to send event before websocket connection established
+            // ensure at least the first relay is relay
             appendLog(`Waiting for connection to first relay ${goodURLs[0]}`);
             await pool.current.ensureRelay(goodURLs[0]);
 
@@ -186,12 +171,12 @@ export default function Create()
                     event);
 
                 pub.on('ok', () => {
-                    appendLog(`At least one relay has accepted our event`);
-                    setIsPublished(true);
+                    // this may be called multiple times, once for every relay that accepts the event
+                    appendLog(`Relay has accepted our event`);
                 });
 
                 pub.on('failed', (reason: any) => {
-                    appendLog(`failed to publish to event: ${reason}`)
+                    appendLog(`Failed to publish to event: ${reason}`)
                 });
             } catch (error)
             {
@@ -200,44 +185,9 @@ export default function Create()
         }
     }
 
-    function textChangeHandler(lines: string[])
-    {
-        setRelayURLs(lines);
-    }
-
-    const onClickHandler = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        createEvent();
-    }
-
     return (
         <Box  display='flex' flexDirection='column' alignItems='center'>
             <Grid container spacing={1} maxWidth='md'>
-                {id != "" && 
-                <>
-                <Grid item xs={12}>
-                    <TextField
-                        id="id"
-                        size="small"
-                        label="Badge Event Id"
-                        fullWidth
-                        variant="standard"
-                        value={id}
-                        InputProps={{readOnly: true}}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <TextField
-                        id="issuerPubkey"
-                        size="small"
-                        label="Pubkey"
-                        fullWidth
-                        variant="standard"
-                        value={pubkey}
-                        InputProps={{readOnly: true}}
-                    />
-                </Grid>
-                </>
-                }
                 <Grid item xs={12}>
                     <Typography variant='h6'>Badge Text</Typography>
                 </Grid>
@@ -250,7 +200,7 @@ export default function Create()
                         fullWidth
                         variant="standard"
                         value={uniqueName}
-                        onChange={handleChange}
+                        onChange={onTextFieldChangeHandler}
                         helperText={"\"bravery\""}
                     />
                 </Grid>
@@ -265,7 +215,7 @@ export default function Create()
                         fullWidth
                         variant="standard"
                         value={name}
-                        onChange={handleChange}
+                        onChange={onTextFieldChangeHandler}
                         helperText={"\"Medal of Bravery\""}
                     />
                 </Grid>
@@ -278,7 +228,7 @@ export default function Create()
                         fullWidth
                         variant="standard"
                         value={description}
-                        onChange={handleChange}
+                        onChange={onTextFieldChangeHandler}
                         helperText={"\"Awarded to users demonstrating bravery\""}
                     />
                 </Grid>
@@ -287,7 +237,7 @@ export default function Create()
                 </Grid>
                 <Grid container spacing={1} columnSpacing={2}>
                     <Grid item xs={6} sm={2}>
-                        <CardActionArea onClick={handleClickOpen}>
+                        <CardActionArea onClick={ () => { setIsDialogOpen(true) } }>
                             <Card  sx={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#F5F5F5' }} >                      
                                 <CardMedia
                                     component="img"
@@ -311,7 +261,7 @@ export default function Create()
                             fullWidth
                             variant="standard"
                             value={image}
-                            onChange={handleChange}
+                            onChange={onTextFieldChangeHandler}
                             helperText={"\"https://nostr.academy/awards/bravery.png\""}
                         />
                         <Box pt={2}>
@@ -322,7 +272,7 @@ export default function Create()
                             fullWidth
                             variant="standard"
                             value={thumb}
-                            onChange={handleChange}
+                            onChange={onTextFieldChangeHandler}
                             helperText={"\"https://nostr.academy/awards/bravery_256x256.png\""
                             }
                             />
@@ -336,7 +286,7 @@ export default function Create()
                             fullWidth
                             variant="standard"
                             value={imageDimensions}
-                            onChange={handleChange}
+                            onChange={onTextFieldChangeHandler}
                             helperText={"\"1024x1024\""}
                         />
                         <Box pt={2}>
@@ -347,7 +297,7 @@ export default function Create()
                                 fullWidth
                                 variant="standard"
                                 value={thumbDimensions}
-                                onChange={handleChange}
+                                onChange={onTextFieldChangeHandler}
                                 helperText={"\"256x256\""}
                             />
                         </Box>
@@ -355,17 +305,16 @@ export default function Create()
                 </Grid>
                 <Grid item xs={12}>
                     <Typography variant='h6'>Relays (one per line)</Typography>
-                    <Multiline lines={relayURLS} onTextChange={textChangeHandler} fullWidth></Multiline>
+                    <Multiline lines={relayURLS} onTextChange={ (lines) => setRelayURLs(lines) } fullWidth></Multiline>
                 </Grid>
             </Grid>
             <Box sx={{ m: 4}}>
-                <SignWithExtension name='Create Badge Event' variant='contained' onClick={onClickHandler}/>
+                <SignWithExtension name='Create Badge Event' variant='contained' onClick={createEvent}/>
             </Box>
-            
             <ImageSelect
                 selectedValue={selectedValue}
-                open={open}
-                onClose={handleClose}
+                open={isDialogOpen}
+                onClose={handleImageSelectClose}
             />
             <Box maxWidth='md' sx={{ border: 1, width: 1, padding: 1, borderColor: 'grey.400' }}>
             <Typography textAlign='left' align='left' alignContent='left' component={'span'}>
