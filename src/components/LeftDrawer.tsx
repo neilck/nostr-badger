@@ -37,7 +37,7 @@ export default function LeftDrawer() {
           <ListItemIcon>
             <BadgeIcon />
           </ListItemIcon>
-          <ListItemText primary="Badges" />
+          <ListItemText primary="Get Badges" />
         </ListItemButton>
       </ListItem>
       <ListItem disablePadding component={Link} to={"/create"} 
@@ -46,7 +46,7 @@ export default function LeftDrawer() {
           <ListItemIcon>
             <AddBoxIcon />
           </ListItemIcon>
-          <ListItemText primary="Create Badge" />
+          <ListItemText primary="Publish Badge" />
         </ListItemButton>
       </ListItem>
       <ListItem disablePadding component={Link} to={"/issue"} 

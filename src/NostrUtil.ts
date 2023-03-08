@@ -1,4 +1,4 @@
-import { Event, getEventHash } from 'nostr-tools';
+import { Event, EventTemplate, getEventHash } from 'nostr-tools';
 import { BadgeDefinition } from './BadgeInterfaces'
 
 export const createBadgeEvent = (fields: BadgeDefinition) => {
@@ -33,5 +33,16 @@ export const createBadgeEvent = (fields: BadgeDefinition) => {
     // must be last
     event.id = getEventHash(event)
     
+    return event;
+}
+
+export const createDeleteEvent = (id: string) => {
+    let event: EventTemplate = {
+        kind: 5,
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [["e", id]],
+        content: "",
+    }
+
     return event;
 }

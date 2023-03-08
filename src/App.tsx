@@ -8,10 +8,10 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import LeftDrawer from './components/LeftDrawer';
-import Create from './components/Create';
-import Issue from './components/Issue';
-import Badges from './components/Badges';
-import Test from './components/Test';
+import Create from './Create';
+import Issue from './Issue';
+import Badges from './Badges';
+import Test from './Test';
 import ImageSelect from './components/ImageSelect';
 import { Route, Routes } from 'react-router-dom';
 
@@ -25,10 +25,10 @@ type Title = {
 export default function App() {
   const titleMap = new Map();
   titleMap.set("/", "Nostr Badger");
-  titleMap.set("/badges", "Badges");
-  titleMap.set("/create", "Create Badge");
+  titleMap.set("/badges", "Get Badges");
+  titleMap.set("/create", "Publish Badge");
   titleMap.set("/issue", "Issue Badge");
-  titleMap.set("/imageselect", "Image Select");
+  titleMap.set("/test", "Test");
   
   const location = useLocation();
   const [title, setTitle] = useState(titleMap.get("/"));

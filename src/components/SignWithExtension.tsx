@@ -9,16 +9,22 @@ interface SignWithExtensionProps extends ButtonProps {
 export function SignWithExtension({name, disabled, ...rest}: SignWithExtensionProps)
 {
     const [hasProvider, setHasProvider] = useState(false);
+    const [checkRun, setCheckRun] = useState(false);
 
     useEffect(() => {
-        setTimeout(checkWindowNostr, 100);
+        setTimeout(checkWindowNostr, 200);
+        
     }, []);
 
     const checkWindowNostr = () => {
         if ((window as any).nostr ) setHasProvider(true);
+        setCheckRun(true);
     }
 
     const renderButton = () => {
+        if (!checkRun)
+            return <></>
+
         if (hasProvider)
             return <Button {...rest}>{name}</Button>
         else

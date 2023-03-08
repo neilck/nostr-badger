@@ -1,10 +1,12 @@
 import { Typography, Grid, TextField, Box, Card, CardMedia, CardActionArea } from '@mui/material';
+import { Multiline } from './components/Multiline';
+import ImageSelect from './components/ImageSelect';
+import { SignWithExtension } from './components/SignWithExtension';
 import React, { useEffect, useState, useRef } from 'react';
-import { Multiline } from './Multiline';
-import ImageSelect from './ImageSelect';
-import { SignWithExtension } from './SignWithExtension';
+import { useLocation } from 'react-router-dom';
 import * as nostr from 'nostr-tools';
-import { createBadgeEvent } from '../NostrUtil';
+import { Event } from 'nostr-tools';
+import { createBadgeEvent } from './NostrUtil';
 
 const defaultFormData = {
     id: "",
@@ -32,6 +34,7 @@ function getBaseUrl(url: string)
 
 export default function Create()
 {
+
     /***** START Image Selector Dialog *****/
     const [isDialogOpen, setIsDialogOpen] = React.useState(false);
     const [selectedValue, setSelectedValue] = React.useState("");
@@ -82,6 +85,64 @@ export default function Create()
             }
         }
     }, []);
+
+    const updateFormDataFromEvent = (event: nostr.Event) =>
+    {
+        const { id, kind, tags, content, created_at, pubkey, sig } = event;
+        let uniqueName = "";
+        let name = "";
+        let description = "";
+        let image = "";
+        let imageDimensions = "";
+        let thumb = "";
+        let thumbDimensions = "";
+        
+        if (tags)
+        {
+            tags.forEach(element => {
+                const tagName = element[0];
+                const length = element.length;
+                switch (tagName) {
+                    case "d":
+                        if (length > 1) uniqueName = element[1];
+                        break;
+                    case "name":
+                        if (length > 1) name = element[1];
+                        break;
+                    case "description":
+                        if (length > 1) description = element[1];
+                        break;
+                    case "image":
+                        if (length > 1) image = element[1];
+                        if (length > 2) imageDimensions = element[2];
+                        break;
+                    case "thumb":
+                        if (length > 1) thumb = element[1];
+                        if (length > 2) thumbDimensions = element[2];
+                        break;
+                }
+            });
+        }
+
+        setFormData((prevState) => ({
+            id: id,
+            uniqueName: uniqueName,
+            name: name,
+            description: description,
+            image: image,
+            imageDimensions: imageDimensions,
+            thumb: thumb,
+            thumbDimensions: thumbDimensions
+        }));
+    }
+
+    // Handle data from Badge component's react router dom Link
+    let state = useLocation().state;
+    if (state && state.fromBadge)
+    {
+        updateFormDataFromEvent( state.fromBadge );
+        useLocation().state.fromBadge = undefined;
+    }
 
     // update state when form field value changes
     const onTextFieldChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -309,17 +370,18 @@ export default function Create()
                 </Grid>
             </Grid>
             <Box sx={{ m: 4}}>
-                <SignWithExtension name='Create Badge Event' variant='contained' onClick={createEvent}/>
+                <SignWithExtension name='Publish Badge Event' variant='contained' onClick={createEvent}/>
             </Box>
             <ImageSelect
                 selectedValue={selectedValue}
                 open={isDialogOpen}
                 onClose={handleImageSelectClose}
             />
-            <Box maxWidth='md' sx={{ border: 1, width: 1, padding: 1, borderColor: 'grey.400' }}>
-            <Typography textAlign='left' align='left' alignContent='left' component={'span'}>
-                <pre style={{ fontFamily: "inherit" }}>{log}</pre>
-            </Typography>
+            {/* <Box maxWidth='md' sx={{ border: 1, width: 1, padding: 1, borderColor: 'grey.400' }}> */ }
+            <Box maxWidth='md'>           
+                <Typography textAlign='left' align='left' alignContent='left' component={'span'}>
+                    <pre style={{ fontFamily: "inherit" }}>{log}</pre>
+                </Typography>
             </Box>
         </Box>  
     )
