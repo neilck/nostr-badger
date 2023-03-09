@@ -25,7 +25,7 @@ type Title = {
 export default function App() {
   const titleMap = new Map();
   titleMap.set("/", "Nostr Badger");
-  titleMap.set("/badges", "Get Badges");
+  titleMap.set("/badges", "Badge Explorer");
   titleMap.set("/create", "Publish Badge");
   titleMap.set("/issue", "Issue Badge");
   titleMap.set("/test", "Test");

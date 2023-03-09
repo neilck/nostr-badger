@@ -1,4 +1,4 @@
-import { Typography, Grid, TextField, Button, Card, CardMedia, CardContent, CardActions, Box } from '@mui/material';
+import { Typography, Grid, TextField, Button, Dialog, Box } from '@mui/material';
 import Badge from './components/Badge';
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -7,6 +7,10 @@ import { createDeleteEvent } from './NostrUtil';
 
 export default function Badges()
 {
+    // dialog
+    const [open, setOpen] = useState(false);
+    const [mesg, setMesg] = useState("mesg");
+
     const [relay, setRelay] = useState("ws://localhost:8008");
     // const [publicKey, setPublicKey] = useState("43094d0a6b72dd5b294e6ac3abcf4740a1867449330976b0394888cf1bda3819");
     // const [publicKey, setPublicKey] = useState("npub1gvy56zntwtw4k22wdtp6hn68gzscvazfxvyhdvpefzyv7x768qvszk4cr5");
@@ -28,20 +32,26 @@ export default function Badges()
         }
             
         const pubkey = await (window as any).nostr.getPublicKey();
+        if (pubkey != event.pubkey)
+        {
+            displayMesg("Can not delete badge issued by different public key")
+            return;
+        }
+
         const deleteEventTemplate = createDeleteEvent( event.id );
         let deleteEvent: any;
 
         let signatureOrEvent = await (window as any).nostr.signEvent(deleteEventTemplate)
         switch (typeof signatureOrEvent) {
             case 'string':
-                console.log(`Sign event returned string ${signatureOrEvent}`);
+                displayMesg(`Error signing with Nostr extension:  ${signatureOrEvent}`);
                 return;
             case 'object':
                 deleteEvent = signatureOrEvent;
                 console.log(`Event signed with sig: ${event.sig.substring(0,10)}...`)
                 break;
             default:
-                console.log('Failed to sign with Nostr extension.');
+                displayMesg('Failed to sign with Nostr extension.');
                 return;
         }
 
@@ -52,22 +62,37 @@ export default function Badges()
 
             pub.on('ok', () => {
                 // this may be called multiple times, once for every relay that accepts the event
-                console.log(`Relay has accepted our event`);
+                displayMesg(`Relay has accepted our delete event`);
             });
 
             pub.on('failed', (reason: any) => {
-                console.log(`Failed to publish to event: ${reason}`)
+                displayMesg(`Failed to publish to delete event: ${reason}`)
             });
         } catch (error)
         {
-            console.log(`Publish event error ${error}`);
+            displayMesg(`Publish delete event error ${error}`);
         }
     }
+
+    function displayMesg(myMesg: string)
+    {
+        setMesg(myMesg);
+        setOpen(true);
+    }
+
     
     // first render and cleanup
     useEffect(() => {
         pool.current = new nostr.SimplePool();
         console.log('Pool initialized');
+
+        const localRelay = window.localStorage.getItem('relay');
+        
+        if (localRelay)
+        {
+                setRelay(localRelay);
+                getBadges(localRelay);
+        }
 
         return() => {
             // add any cleanup code here
@@ -79,18 +104,25 @@ export default function Badges()
         }
     }, []);
 
+    useEffect(() => {
+        window.localStorage.setItem('relay', relay);
+    }, [relay])
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     {
         if (e.target.id == "relay") setRelay((prevState) => (e.target.value));
         if (e.target.id == "publicKey") setPublicKey((prevState) => (e.target.value));
     };
 
-    const getBadges = async () =>
+    const getBadges = async (pRelay?: string) =>
     {
+        if(!pRelay)
+            pRelay = relay;
+
         setBadges([]);
         if (pool.current)
         {
-            await pool.current?.ensureRelay(relay);
+            await pool.current?.ensureRelay(pRelay);
 
             let filter: any;
             let pubkey = publicKey;
@@ -116,7 +148,7 @@ export default function Badges()
                 }
             }
 
-            let sub = pool.current.sub([relay], [filter]);
+            let sub = pool.current.sub([pRelay], [filter]);
             sub.on('event', (event: nostr.Event) => {
                 setBadges( (currentState) => [...currentState, event]);
                 
@@ -155,7 +187,7 @@ export default function Badges()
                 </Grid>
                 
             </Grid>
-            <Button variant='contained' onClick={getBadges}>Get Badges</Button>
+            <Button variant='contained' onClick={ (e) => { getBadges() }}>Get Badges</Button>
             <Box sx={{mt: 4}}>
                 <Grid container spacing={4} maxWidth='md'>
                     {badges.map( (badge: nostr.Event, index: number, array: nostr.Event[]) => (
@@ -165,6 +197,11 @@ export default function Badges()
                     ))}
                 </Grid>
             </Box>
+            <Dialog open={ open } onClick={ () => setOpen(false) }>
+                <Box sx={{margin: 2, padding: 2}}>
+                    <Typography>{mesg}</Typography>
+                </Box>
+            </Dialog>
         </Box>        
     )
 }

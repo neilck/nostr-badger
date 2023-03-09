@@ -1,10 +1,10 @@
-import { Typography, IconButton, Card, CardMedia, Box } from '@mui/material';
+import { Typography, IconButton, Card, CardMedia, Box, Link } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { Link } from 'react-router-dom';
+import { Link as ReactLink } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
-import { Event, relayInit } from 'nostr-tools';
+import { Event, nip19, relayInit } from 'nostr-tools';
 
 import { SignWithExtension } from './SignWithExtension';
 
@@ -48,6 +48,9 @@ export default function Badge( props: BadgeProps )
                 break;
         }
     });
+    const npub = nip19.npubEncode(pubkey);
+    const ndLink = `https://nostr.directory/p/${npub}`;
+    const bpLink = `https://badges.page/p/${pubkey}`;
 
     const [showCode, setShowCode] = useState(false);
     const [showDelete, setShowDelete] = useState(false);
@@ -76,18 +79,21 @@ export default function Badge( props: BadgeProps )
                     
                     <Typography variant="h6" >{name}</Typography>
                     <Typography>{description}</Typography>
+                    <a target="_blank" href={bpLink}>badges.page</a>&nbsp;&nbsp;
+                    <a target="_blank" href={ndLink}>nostr.directory</a>
+                    
                 </Box>
             </Box>
             <Box sx={{ display: 'flex', height: '30px', backgroundColor: 'white', width: 1, padding: 1, alignItems: 'center', justifyContent: 'space-between'}}>  
-                <Box sx={{ width: '100px'}}>
+                <Box sx={{ width: '200px'}}>
                     <Typography variant='subtitle2'>{uniqueName}</Typography>  
                 </Box>
                 <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'right', width:1}}>
                     
                     <Box sx={{ width: '40px', height: '40px', padding: '8px'}}>
-                        <Link to="/create" state={{ fromBadge: props.event }}>
+                        <ReactLink to="/create" state={{ fromBadge: props.event }}>
                             <EditIcon sx={{color: 'rgba(0,0,0,0.54)'}} />
-                        </Link>
+                        </ReactLink>
                     </Box>
                     <IconButton aria-label="delete" onClick={ () => { setShowDelete( (prevState) => { return !prevState})}}>
                         <DeleteIcon />
