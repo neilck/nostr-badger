@@ -2,11 +2,11 @@ import { Typography, Grid, TextField, Box, Card, CardMedia, CardActionArea } fro
 import { Multiline } from './components/Multiline';
 import ImageSelect from './components/ImageSelect';
 import { SignWithExtension } from './components/SignWithExtension';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
 import * as nostr from 'nostr-tools';
-import { Event } from 'nostr-tools';
 import { createBadgeEvent } from './NostrUtil';
+import { getRelayContext } from './RelayContext';
 
 const defaultFormData = {
     id: "",
@@ -65,7 +65,10 @@ export default function Create()
     const [formData, setFormData] = useState(initFormData);
     const { id, uniqueName, name, description, image, imageDimensions, thumb, thumbDimensions } = formData;
     const pool = useRef<nostr.SimplePool | null>(null);
-    const [relayURLS, setRelayURLs] = React.useState(["ws://localhost:8008"]);
+    // const [relayURLS, setRelayURLs] = React.useState(["ws://localhost:8008"]);
+    const relays = getRelayContext().relays;
+    const setRelays = getRelayContext().setRelays;
+
     const openRelays = useRef<string[] | null>(null);
 
 
@@ -203,14 +206,14 @@ export default function Create()
         appendLog(`About to send event with id: ${event.id.substring(0,10)}...`);
 
         // send event to relays
-        if (pool.current && relayURLS && relayURLS.length > 0)
+        if (pool.current && relays && relays.length > 0)
         {
             // relayURLs from multiline component may have empty lines
             const goodURLs = new Array<string>();
-            for (let i=0; i<relayURLS.length; i++)
+            for (let i=0; i<relays.length; i++)
             {
-                if (relayURLS[i].length > 0)
-                goodURLs.push(relayURLS[i]);
+                if (relays[i].length > 0)
+                goodURLs.push(relays[i]);
             } 
             
             if (goodURLs.length == 0)
@@ -366,7 +369,7 @@ export default function Create()
                 </Grid>
                 <Grid item xs={12}>
                     <Typography variant='h6'>Relays (one per line)</Typography>
-                    <Multiline lines={relayURLS} onTextChange={ (lines) => setRelayURLs(lines) } fullWidth></Multiline>
+                    <Multiline lines={relays} onTextChange={ (lines) => setRelays(lines) } fullWidth></Multiline>
                 </Grid>
             </Grid>
             <Box sx={{ m: 4}}>

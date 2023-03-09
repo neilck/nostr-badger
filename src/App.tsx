@@ -12,8 +12,8 @@ import Create from './Create';
 import Issue from './Issue';
 import Badges from './Badges';
 import Test from './Test';
-import ImageSelect from './components/ImageSelect';
 import { Route, Routes } from 'react-router-dom';
+import { RelayContext } from './RelayContext';
 
 const drawerWidth = 240;
 type Title = {
@@ -23,6 +23,8 @@ type Title = {
 
 
 export default function App() {
+  const [relays, setRelays] = useState(["ws:localhost:3000"])
+
   const titleMap = new Map();
   titleMap.set("/", "Nostr Badger");
   titleMap.set("/badges", "Badge Explorer");
@@ -33,9 +35,23 @@ export default function App() {
   const location = useLocation();
   const [title, setTitle] = useState(titleMap.get("/"));
 
+  // persist relay URLs even if App if refreshed
+  useEffect(() => {
+    const localRelays = window.localStorage.getItem('relays');
+        if (localRelays)
+        {
+            setRelays(JSON.parse(localRelays));
+        }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem('relays', JSON.stringify(relays));
+  }, [relays]);
+
   useEffect(() => {
     setTitle(titleMap.get(location.pathname));
   }, [location.pathname]);
+
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -68,12 +84,14 @@ export default function App() {
       >
         <Toolbar />
 
-      <Routes>
-        <Route path="create" element={<Create />} />
-        <Route path="issue" element={<Issue />} />
-        <Route path="badges" element={<Badges />} />
-        <Route path="test" element={<Test />} />
-      </Routes>
+      <RelayContext.Provider value={{relays, setRelays}}>
+        <Routes>
+            <Route path="create" element={<Create />} />
+            <Route path="issue" element={<Issue />} />
+            <Route path="badges" element={<Badges />} />
+            <Route path="test" element={<Test />} />
+        </Routes>
+      </RelayContext.Provider>
       </Box>
 
     </Box>

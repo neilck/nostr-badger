@@ -1,22 +1,25 @@
 import { Typography, Grid, TextField, Button, Dialog, Box } from '@mui/material';
 import Badge from './components/Badge';
-
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import * as nostr from 'nostr-tools';
 import { createDeleteEvent } from './NostrUtil';
+import { getRelayContext } from './RelayContext';
 
 export default function Badges()
 {
     // dialog
     const [open, setOpen] = useState(false);
     const [mesg, setMesg] = useState("mesg");
-
-    const [relay, setRelay] = useState("ws://localhost:8008");
     // const [publicKey, setPublicKey] = useState("43094d0a6b72dd5b294e6ac3abcf4740a1867449330976b0394888cf1bda3819");
     // const [publicKey, setPublicKey] = useState("npub1gvy56zntwtw4k22wdtp6hn68gzscvazfxvyhdvpefzyv7x768qvszk4cr5");
     const [publicKey, setPublicKey] = useState("");
     const [badges, setBadges] = useState<nostr.Event[]>([]);
+    const [relay, setRelay] = useState(getRelayContext().relays.length > 0 ? getRelayContext().relays[0] : "");
+    const relays = getRelayContext().relays;
+    const setRelays = getRelayContext().setRelays;
+
     const pool = useRef<nostr.SimplePool | null>(null);
+
 
     const onDelete = async (event: nostr.Event) => {
         if (!(window as any).nostr)
@@ -85,13 +88,10 @@ export default function Badges()
     useEffect(() => {
         pool.current = new nostr.SimplePool();
         console.log('Pool initialized');
-
-        const localRelay = window.localStorage.getItem('relay');
-        
-        if (localRelay)
+       
+        if (relay && relay != "")
         {
-                setRelay(localRelay);
-                getBadges(localRelay);
+            getBadges(relay);
         }
 
         return() => {
@@ -104,13 +104,22 @@ export default function Badges()
         }
     }, []);
 
+    // update relay context
     useEffect(() => {
-        window.localStorage.setItem('relay', relay);
-    }, [relay])
+        if (relays.length == 0)
+        {
+            setRelays([relay]);
+        }
+        else{
+            relays[0] = relay;
+            setRelays(relays);
+        }
+    }, [relay]);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     {
-        if (e.target.id == "relay") setRelay((prevState) => (e.target.value));
+        if (e.target.id == "relay") setRelay(e.target.value);
         if (e.target.id == "publicKey") setPublicKey((prevState) => (e.target.value));
     };
 
@@ -122,7 +131,13 @@ export default function Badges()
         setBadges([]);
         if (pool.current)
         {
-            await pool.current?.ensureRelay(pRelay);
+            try{
+                await pool.current?.ensureRelay(pRelay);
+            } catch (e)
+            {
+                console.log(e);
+                return;
+            }
 
             let filter: any;
             let pubkey = publicKey;
