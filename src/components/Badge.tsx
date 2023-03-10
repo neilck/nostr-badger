@@ -4,14 +4,15 @@ import EditIcon from '@mui/icons-material/Edit';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link as ReactLink } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, ReactElement } from 'react';
 import { Event, nip19, relayInit } from 'nostr-tools';
 
 import { SignWithExtension } from './SignWithExtension';
 
 interface BadgeProps {
     event: Event
-    onDelete?: (event: Event) => void 
+    onDelete?: (event: Event) => void,
+    readOnly?: boolean 
 }
 
 export default function Badge( props: BadgeProps )
@@ -62,6 +63,29 @@ export default function Badge( props: BadgeProps )
             props.onDelete(props.event);
     }
     
+    const renderActionIcons = () => 
+    {
+        if (props.readOnly)
+            return (<></>);
+        
+        return (
+            <>
+            <Box sx={{ width: '40px', height: '40px', padding: '8px'}}>
+                        <ReactLink to="/create" state={{ fromBadge: props.event }}>
+                            <EditIcon sx={{color: 'rgba(0,0,0,0.54)'}} />
+                        </ReactLink>
+                    </Box>
+                    <Box sx={{ width: '40px', height: '40px', padding: '8px'}}>
+                        <ReactLink to="/award" state={{ fromBadge: props.event }}>
+                            <PersonAddIcon sx={{color: 'rgba(0,0,0,0.54)'}} />
+                        </ReactLink>
+                    </Box>
+                    <IconButton aria-label="delete" onClick={ () => { setShowDelete( (prevState) => { return !prevState})}}>
+                        <DeleteIcon />
+                    </IconButton>
+                    </>
+        );
+    }
     return (
         <Card sx={{ display: 'flex', flexDirection: 'column', border: 1, borderColor: 'grey.200', backgroundColor: 'grey.200'}} >
             <Box sx={{ display: 'flex', width: 1}}>       
@@ -91,19 +115,7 @@ export default function Badge( props: BadgeProps )
                 </Box>
                 <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'right', width:1}}>
                     
-                    <Box sx={{ width: '40px', height: '40px', padding: '8px'}}>
-                        <ReactLink to="/create" state={{ fromBadge: props.event }}>
-                            <EditIcon sx={{color: 'rgba(0,0,0,0.54)'}} />
-                        </ReactLink>
-                    </Box>
-                    <Box sx={{ width: '40px', height: '40px', padding: '8px'}}>
-                        <ReactLink to="/award" state={{ fromBadge: props.event }}>
-                            <PersonAddIcon sx={{color: 'rgba(0,0,0,0.54)'}} />
-                        </ReactLink>
-                    </Box>
-                    <IconButton aria-label="delete" onClick={ () => { setShowDelete( (prevState) => { return !prevState})}}>
-                        <DeleteIcon />
-                    </IconButton>
+                    {renderActionIcons()}
                     <IconButton aria-label="code" onClick={ () => { setShowCode( (prevState) => { return !prevState })}}>
                         <CodeIcon />
                     </IconButton>

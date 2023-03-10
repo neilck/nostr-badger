@@ -1,5 +1,4 @@
 import { Typography, Grid, TextField, Box, Card, CardMedia, CardActionArea } from '@mui/material';
-import { Multiline } from './components/Multiline';
 import ImageSelect from './components/ImageSelect';
 import { SignWithExtension } from './components/SignWithExtension';
 import React, { useEffect, useState, useRef, useContext } from 'react';
@@ -65,7 +64,6 @@ export default function Create()
     const [formData, setFormData] = useState(initFormData);
     const { id, uniqueName, name, description, image, imageDimensions, thumb, thumbDimensions } = formData;
     const pool = useRef<nostr.SimplePool | null>(null);
-    // const [relayURLS, setRelayURLs] = React.useState(["ws://localhost:8008"]);
     const relay = getRelayContext().relay;
 
     const openRelays = useRef<string[] | null>(null);
@@ -171,10 +169,7 @@ export default function Create()
             // get public key from NIP-07 browser extension
             publicKey: await (window as any).nostr.getPublicKey()
         });
-   
-        // calculate event ID
-        event.id = nostr.getEventHash(event)        
-
+    
         // sign event using NIP-07 browser extension
         // UI prevents this function from being called when window.nostr doesn't exist
         if ((window as any).nostr) {

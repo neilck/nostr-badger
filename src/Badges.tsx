@@ -186,7 +186,6 @@ export default function Badges()
 
     return (
         <>
-        <Box width='lg' sx={{ }} >&nbsp;</Box>
         <Box  width={1} display='flex' flexDirection='column' alignItems='center' justifyContent='bottom'>
    
             <Grid container spacing={1}>

@@ -46,3 +46,27 @@ export const createDeleteEvent = (id: string) => {
 
     return event;
 }
+
+export const createAwardEvent = (issuer: string, uniqueName: string, relay: string, pubkeys: string[]) => {
+    let event: Event = {
+        kind: 8,
+        pubkey: issuer,
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [],
+        content: "",
+        id: "",
+        sig: ""
+    }
+
+    event.tags.push(["a", `30009:${issuer}:${uniqueName}`]);
+    pubkeys.map( (pubkey) => {
+        event.tags.push(["p", pubkey, relay])
+    });
+
+    // must be last
+    event.id = getEventHash(event)
+    
+    return event;
+}
+
+

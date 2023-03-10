@@ -33,6 +33,6 @@ export function Multiline({lines, onTextChange, ...rest}: MultlineProps)
     }
 
     return (
-        <TextField multiline onChange={onChange} value={arrayToString(lines)} {...rest} />
+        <TextField multiline fullWidth onChange={onChange} value={arrayToString(lines)} {...rest} />
     )
 }
