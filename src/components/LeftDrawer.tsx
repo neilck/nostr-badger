@@ -49,15 +49,6 @@ export default function LeftDrawer() {
           <ListItemText primary="Publish Badge" />
         </ListItemButton>
       </ListItem>
-      <ListItem disablePadding component={Link} to={"/award"} 
-        css={css`color: #000000DE;`}>
-        <ListItemButton>
-          <ListItemIcon>
-            <AssignmentIndIcon />
-          </ListItemIcon>
-          <ListItemText primary="Award Badge" />
-        </ListItemButton>
-      </ListItem>
     </List>
     <Divider />
     </Drawer>
