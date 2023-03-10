@@ -1,42 +1,16 @@
-# Material UI - Create React App example in TypeScript
+# Nostr Badger - Nostr Badge Explorer in TypeScript
 
-## How to use
+## What does this do?
+![nostr-badger](https://user-images.githubusercontent.com/11378702/224309122-263020e2-e2ca-4818-a1e9-e512f814bbf1.png)
 
-Download the example [or clone the repo](https://github.com/mui/material-ui):
+Typescript / React web app for Nostr NIP-28 Badge Management. 
+- browse badges by relay
+- create / edit / delete / award a badge
 
-<!-- #default-branch-switch -->
+This code is experimental, and written as a learning exercise. 
+For better code see [badges.page](https://github.com/verbiricha/badges).
 
-```sh
-curl https://codeload.github.com/mui/material-ui/tar.gz/master | tar -xz --strip=2 material-ui-master/examples/material-cra-ts
-cd material-cra-ts
-```
+This code demonstrates:
+- Using [nostr-tools](https://github.com/nbd-wtf/nostr-tools) to implement [NIP-28](https://github.com/nostr-protocol/nips/blob/master/58.md) within a client
+- using [NIP-07](https://github.com/nostr-protocol/nips/blob/master/07.md) to get public / private keys from Nostr Extension (nos2x, getalby) 
 
-Install it and run:
-
-```sh
-npm install
-npm start
-```
-
-or:
-
-<!-- #default-branch-switch -->
-
-[![Edit on CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/mui/material-ui/tree/master/examples/material-cra-ts)
-
-<!-- #default-branch-switch -->
-
-[![Edit on StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/mui/material-ui/tree/master/examples/material-cra-ts)
-
-## The idea behind the example
-
-This example demonstrates how you can use Material UI with [Create React App](https://github.com/facebookincubator/create-react-app) in [TypeScript](https://github.com/Microsoft/TypeScript).
-It includes `@mui/material` and its peer dependencies, including [Emotion](https://emotion.sh/docs/introduction), the default style engine in Material UI v5.
-If you prefer, you can [use styled-components instead](https://mui.com/material-ui/guides/interoperability/#styled-components).
-
-## What's next?
-
-<!-- #default-branch-switch -->
-
-You now have a working example project.
-You can head back to the documentation, continuing browsing it from the [templates](https://mui.com/material-ui/getting-started/templates/) section.
