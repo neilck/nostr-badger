@@ -6,6 +6,7 @@
 Typescript / React web app for Nostr NIP-28 Badge Management. 
 - browse badges by relay
 - create / edit / delete / award a badge
+- link to badge issuer's nostr.directory and badges.page profile pages
 
 This code is experimental, and written as a learning exercise. 
 For better code see [badges.page](https://github.com/verbiricha/badges).
