@@ -66,8 +66,7 @@ export default function Create()
     const { id, uniqueName, name, description, image, imageDimensions, thumb, thumbDimensions } = formData;
     const pool = useRef<nostr.SimplePool | null>(null);
     // const [relayURLS, setRelayURLs] = React.useState(["ws://localhost:8008"]);
-    const relays = getRelayContext().relays;
-    const setRelays = getRelayContext().setRelays;
+    const relay = getRelayContext().relay;
 
     const openRelays = useRef<string[] | null>(null);
 
@@ -205,33 +204,25 @@ export default function Create()
 
         appendLog(`About to send event with id: ${event.id.substring(0,10)}...`);
 
-        // send event to relays
-        if (pool.current && relays && relays.length > 0)
+        if (relay.length == 0)
         {
-            // relayURLs from multiline component may have empty lines
-            const goodURLs = new Array<string>();
-            for (let i=0; i<relays.length; i++)
-            {
-                if (relays[i].length > 0)
-                goodURLs.push(relays[i]);
-            } 
-            
-            if (goodURLs.length == 0)
-            {
-                appendLog('No relay URLs specified');
-                return;
-            }
+            appendLog('No relay URL specified');
+            return;
+        }
 
+        // send event to relays
+        if (pool.current)
+        {           
             // pool.current.publish sometimes tries to send event before websocket connection established
             // ensure at least the first relay is relay
-            appendLog(`Waiting for connection to first relay ${goodURLs[0]}`);
-            await pool.current.ensureRelay(goodURLs[0]);
+            appendLog(`Waiting for connection to first relay ${relay}`);
+            await pool.current.ensureRelay(relay);
 
             try {
-                openRelays.current = goodURLs;
+                openRelays.current = [relay];
                 openRelays.current.map( (relay) => console.log(`Added relay to open connections ${relay}`));
 
-                let pub = pool.current!.publish(goodURLs!,
+                let pub = pool.current!.publish([relay],
                     event);
 
                 pub.on('ok', () => {
@@ -251,58 +242,14 @@ export default function Create()
 
     return (
         <Box  display='flex' flexDirection='column' alignItems='center'>
-            <Grid container spacing={1} maxWidth='md'>
+            <Grid container spacing={1}>
                 <Grid item xs={12}>
-                    <Typography variant='h6'>Badge Text</Typography>
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                    <TextField
-                        required
-                        id="uniqueName"
-                        size="small"
-                        label="Unique Name"
-                        fullWidth
-                        variant="standard"
-                        value={uniqueName}
-                        onChange={onTextFieldChangeHandler}
-                        helperText={"\"bravery\""}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={9}>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                    <TextField
-                        required
-                        id="name"
-                        size="small"
-                        label="Name"
-                        fullWidth
-                        variant="standard"
-                        value={name}
-                        onChange={onTextFieldChangeHandler}
-                        helperText={"\"Medal of Bravery\""}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={8}>
-                    <TextField
-                        required
-                        id="description"
-                        size="small"
-                        label="Description"
-                        fullWidth
-                        variant="standard"
-                        value={description}
-                        onChange={onTextFieldChangeHandler}
-                        helperText={"\"Awarded to users demonstrating bravery\""}
-                    />
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography variant='h6'>Badge Image</Typography>
+                    <Typography fontWeight={600}>Badge</Typography>
                 </Grid>
                 <Grid container spacing={1} columnSpacing={2}>
                     <Grid item xs={6} sm={2}>
                         <CardActionArea onClick={ () => { setIsDialogOpen(true) } }>
-                            <Card  sx={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: '#F5F5F5' }} >                      
+                            <Card  sx={{  display: 'flex', flexDirection: 'column', backgroundColor: '#F5F5F5' }} >                      
                                 <CardMedia
                                     component="img"
                                     sx={{
@@ -316,61 +263,99 @@ export default function Create()
                             </Card>
                         </CardActionArea>
                     </Grid>
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} sm={10}>
+                        <Box width={0.5}>
+                            <TextField
+                                required
+                                id="uniqueName"
+                                size="small"
+                                label="Unique Name"
+                                fullWidth
+                                variant="outlined"
+                                value={uniqueName}
+                                onChange={onTextFieldChangeHandler}
+                            />
+                            <Box pt={1} pb={1}>
+                                <TextField
+                                    required
+                                    id="name"
+                                    size="small"
+                                    label="Name"
+                                    fullWidth
+                                    variant="outlined"
+                                    value={name}
+                                    onChange={onTextFieldChangeHandler}
+                                />
+                            </Box>
+                        </Box>  
                         <TextField
                             required
-                            id="image"
+                            id="description"
                             size="small"
-                            label="Image URL"
+                            label="Description"
                             fullWidth
-                            variant="standard"
-                            value={image}
+                            variant="outlined"
+                            value={description}
                             onChange={onTextFieldChangeHandler}
-                            helperText={"\"https://nostr.academy/awards/bravery.png\""}
                         />
-                        <Box pt={2}>
-                            <TextField
-                            id="thumb"
-                            size="small"
-                            label="Thumb URL"
-                            fullWidth
-                            variant="standard"
-                            value={thumb}
-                            onChange={onTextFieldChangeHandler}
-                            helperText={"\"https://nostr.academy/awards/bravery_256x256.png\""
-                            }
-                            />
-                        </Box>
-                    </Grid>
-                    <Grid item xs={12} sm={2}>
-                        <TextField
-                            id="imageDimensions"
-                            size="small"
-                            label="Image Dim."
-                            fullWidth
-                            variant="standard"
-                            value={imageDimensions}
-                            onChange={onTextFieldChangeHandler}
-                            helperText={"\"1024x1024\""}
-                        />
-                        <Box pt={2}>
-                            <TextField
-                                id="thumbDimensions"
-                                size="small"
-                                label="Thumb Dim."
-                                fullWidth
-                                variant="standard"
-                                value={thumbDimensions}
-                                onChange={onTextFieldChangeHandler}
-                                helperText={"\"256x256\""}
-                            />
-                        </Box>
-                    </Grid>
+                    </Grid>                       
                 </Grid>
                 <Grid item xs={12}>
-                    <Typography variant='h6'>Relays (one per line)</Typography>
-                    <Multiline lines={relays} onTextChange={ (lines) => setRelays(lines) } fullWidth></Multiline>
+                    <Typography fontWeight={600}>Image URLs</Typography>
                 </Grid>
+                <Grid item xs={12} sm={10}>
+                    <TextField
+                        required
+                        id="image"
+                        size="small"
+                        label="Image URL"
+                        fullWidth
+                        variant="outlined"
+                        value={image}
+                        onChange={onTextFieldChangeHandler}
+                    />
+                    <Box pt={1}>
+                        <TextField
+                        id="thumb"
+                        size="small"
+                        label="Thumb URL"
+                        fullWidth
+                        variant="outlined"
+                        value={thumb}
+                        onChange={onTextFieldChangeHandler}
+                        />
+                    </Box>
+                </Grid>
+                <Grid item xs={12} sm={2}>
+                    <TextField
+                        id="imageDimensions"
+                        size="small"
+                        label="Image Dim."
+                        fullWidth
+                        variant="outlined"
+                        value={imageDimensions}
+                        onChange={onTextFieldChangeHandler}
+                    />
+                    <Box pt={1}>
+                        <TextField
+                            id="thumbDimensions"
+                            size="small"
+                            label="Thumb Dim."
+                            fullWidth
+                            variant="outlined"
+                            value={thumbDimensions}
+                            onChange={onTextFieldChangeHandler}
+                        />
+                    </Box>
+                </Grid>
+
+
+            </Grid> {/* end grid */}
+        
+        <Grid>
+                                
+        
+                    
             </Grid>
             <Box sx={{ m: 4}}>
                 <SignWithExtension name='Publish Badge Event' variant='contained' onClick={createEvent}/>

@@ -1,6 +1,7 @@
 import { Typography, IconButton, Card, CardMedia, Box, Link } from '@mui/material';
 import CodeIcon from '@mui/icons-material/Code';
 import EditIcon from '@mui/icons-material/Edit';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Link as ReactLink } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
@@ -93,6 +94,11 @@ export default function Badge( props: BadgeProps )
                     <Box sx={{ width: '40px', height: '40px', padding: '8px'}}>
                         <ReactLink to="/create" state={{ fromBadge: props.event }}>
                             <EditIcon sx={{color: 'rgba(0,0,0,0.54)'}} />
+                        </ReactLink>
+                    </Box>
+                    <Box sx={{ width: '40px', height: '40px', padding: '8px'}}>
+                        <ReactLink to="/award" state={{ fromBadge: props.event }}>
+                            <PersonAddIcon sx={{color: 'rgba(0,0,0,0.54)'}} />
                         </ReactLink>
                     </Box>
                     <IconButton aria-label="delete" onClick={ () => { setShowDelete( (prevState) => { return !prevState})}}>

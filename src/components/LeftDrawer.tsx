@@ -20,7 +20,7 @@ export default function LeftDrawer() {
   const navMap = new Map();
   navMap.set("", "Nostr Badger");
   navMap.set("create", "Create Badge");
-  navMap.set("issue", "Issue Badge");
+  navMap.set("award", "Award Badge");
     
   const mapIter = navMap.keys();
 
@@ -49,13 +49,13 @@ export default function LeftDrawer() {
           <ListItemText primary="Publish Badge" />
         </ListItemButton>
       </ListItem>
-      <ListItem disablePadding component={Link} to={"/issue"} 
+      <ListItem disablePadding component={Link} to={"/award"} 
         css={css`color: #000000DE;`}>
         <ListItemButton>
           <ListItemIcon>
             <AssignmentIndIcon />
           </ListItemIcon>
-          <ListItemText primary="Issue Badge" />
+          <ListItemText primary="Award Badge" />
         </ListItemButton>
       </ListItem>
     </List>

@@ -15,7 +15,7 @@ import AdbIcon from '@mui/icons-material/Adb';
 
 import { Link } from 'react-router-dom';
 
-const pages = ['Create', 'Issue'];
+const pages = ['Create', 'Award'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
 function MyAppBar() {

@@ -14,9 +14,7 @@ export default function Badges()
     // const [publicKey, setPublicKey] = useState("npub1gvy56zntwtw4k22wdtp6hn68gzscvazfxvyhdvpefzyv7x768qvszk4cr5");
     const [publicKey, setPublicKey] = useState("");
     const [badges, setBadges] = useState<nostr.Event[]>([]);
-    const [relay, setRelay] = useState(getRelayContext().relays.length > 0 ? getRelayContext().relays[0] : "");
-    const relays = getRelayContext().relays;
-    const setRelays = getRelayContext().setRelays;
+    const relay = getRelayContext().relay;
     const [hasProvider, setHasProvider] = useState(true);
 
     const pool = useRef<nostr.SimplePool | null>(null);
@@ -90,10 +88,10 @@ export default function Badges()
         pool.current = new nostr.SimplePool();
         console.log('Pool initialized');
        
-        if (relay && relay != "")
-        {
-            getBadges(relay);
-        }
+        // if (relay && relay != "")
+        // {
+        //     getBadges(relay);
+        // }
 
         return() => {
             // add any cleanup code here
@@ -105,22 +103,8 @@ export default function Badges()
         }
     }, []);
 
-    // update relay context
-    useEffect(() => {
-        if (relays.length == 0)
-        {
-            setRelays([relay]);
-        }
-        else{
-            relays[0] = relay;
-            setRelays(relays);
-        }
-    }, [relay]);
-
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     {
-        if (e.target.id == "relay") setRelay(e.target.value);
         if (e.target.id == "publicKey") setPublicKey((prevState) => (e.target.value));
     };
 
@@ -146,16 +130,18 @@ export default function Badges()
         }
     }
 
-    const getBadges = async (pRelay?: string) =>
+    const getBadges = async (relay: string) =>
     {
-        if(!pRelay)
-            pRelay = relay;
-
         setBadges([]);
+
+        if (relay.length == 0)
+            return;
+
         if (pool.current)
         {
             try{
-                await pool.current?.ensureRelay(pRelay);
+                console.log(`checking relay: ${relay}`);
+                await pool.current?.ensureRelay(relay);
             } catch (e)
             {
                 console.log(e);
@@ -186,13 +172,13 @@ export default function Badges()
                 }
             }
 
-            let sub = pool.current.sub([pRelay], [filter]);
+            let sub = pool.current.sub([relay], [filter]);
             sub.on('event', (event: nostr.Event) => {
-                setBadges( (currentState) => [...currentState, event]);
-                
                 console.log(`found badge ${event.id}`)
+                setBadges( (currentState) => [...currentState, event]);
             });
             sub.on('eose', () => {
+                console.log(`eose`)
                 sub.unsub();
             });
         }  
@@ -200,23 +186,10 @@ export default function Badges()
 
     return (
         <>
-        <Box  display='flex' flexDirection='column' alignItems='center' justifyContent='bottom'>
+        <Box width='lg' sx={{ }} >&nbsp;</Box>
+        <Box  width={1} display='flex' flexDirection='column' alignItems='center' justifyContent='bottom'>
    
-            <Grid container spacing={1} maxWidth='md'>
-                <Grid item xs={9}>
-                    <TextField
-                        required
-                        id="relay"
-                        label="Relay"
-                        fullWidth
-                        variant="standard"
-                        value={relay}
-                        onChange={handleChange}
-                    />
-                </Grid>
-                <Grid item xs={3}>
-
-                </Grid>
+            <Grid container spacing={1}>
                 <Grid item xs={9} >
                     <TextField
                         id="publicKey"
@@ -238,9 +211,8 @@ export default function Badges()
                     </Box>
                     
                 </Grid>
-                
             </Grid>
-            <Button variant='contained' onClick={ (e) => { getBadges() }}>Get Badges</Button>
+            <Button variant='contained' onClick={ (e) => { getBadges(relay) }}>Get Badges</Button>
             <Box sx={{mt: 4}}>
                 <Grid container spacing={4} maxWidth='md'>
                     {badges.map( (badge: nostr.Event, index: number, array: nostr.Event[]) => (

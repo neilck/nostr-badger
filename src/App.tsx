@@ -8,10 +8,13 @@ import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import LeftDrawer from './components/LeftDrawer';
+import Relay from './components/Relay';
+
 import Create from './Create';
-import Issue from './Issue';
+import Award from './Award';
 import Badges from './Badges';
 import Test from './Test';
+
 import { Route, Routes } from 'react-router-dom';
 import { RelayContext } from './RelayContext';
 
@@ -23,13 +26,13 @@ type Title = {
 
 
 export default function App() {
-  const [relays, setRelays] = useState(["ws://localhost:8008"])
+  const [relay, setRelay] = useState("ws://localhost:8008")
 
   const titleMap = new Map();
   titleMap.set("/", "Nostr Badger");
   titleMap.set("/badges", "Badge Explorer");
   titleMap.set("/create", "Publish Badge");
-  titleMap.set("/issue", "Issue Badge");
+  titleMap.set("/award", "Award Badge");
   titleMap.set("/test", "Test");
   
   const location = useLocation();
@@ -37,16 +40,16 @@ export default function App() {
 
   // persist relay URLs even if App if refreshed
   useEffect(() => {
-    const localRelays = window.localStorage.getItem('relays');
-        if (localRelays)
+    const localRelay = window.localStorage.getItem('relay');
+        if (localRelay)
         {
-            setRelays(JSON.parse(localRelays));
+            setRelay(localRelay);
         }
   }, []);
 
   useEffect(() => {
-    window.localStorage.setItem('relays', JSON.stringify(relays));
-  }, [relays]);
+    window.localStorage.setItem('relay', relay)
+  }, [relay]);
 
   useEffect(() => {
     setTitle(titleMap.get(location.pathname));
@@ -54,7 +57,7 @@ export default function App() {
 
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box display='flex'>
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -78,20 +81,22 @@ export default function App() {
       <LeftDrawer />
     </Box>
 
-      <Box
-        component="main"
-        sx={{ flexGrow: 1, p: 3 }}
-      >
-        <Toolbar />
-
-      <RelayContext.Provider value={{relays, setRelays}}>
-        <Routes>
-            <Route path="create" element={<Create />} />
-            <Route path="issue" element={<Issue />} />
-            <Route path="badges" element={<Badges />} />
-            <Route path="test" element={<Test />} />
-        </Routes>
-      </RelayContext.Provider>
+      <Box component="main" display='flex' width={1} flexDirection='column' alignItems='center' sx={{ p: 2 }}>
+      <Toolbar />
+      <RelayContext.Provider value={{relay, setRelay}}>
+        <Box display='flex' flexDirection='column' alignItems='left' width='800px' sx={{ }}>
+          <Relay fullWidth></Relay>
+          <Box mt={1}>
+          <Routes>
+              <Route path="create" element={<Create />} />
+              <Route path="award" element={<Award />} />
+              <Route path="badges" element={<Badges />} />
+              <Route path="test" element={<Test />} />
+          </Routes>
+          </Box>
+          </Box>
+        </RelayContext.Provider>
+        
       </Box>
 
     </Box>
