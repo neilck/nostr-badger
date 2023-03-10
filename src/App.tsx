@@ -23,7 +23,7 @@ type Title = {
 
 
 export default function App() {
-  const [relays, setRelays] = useState(["ws:localhost:3000"])
+  const [relays, setRelays] = useState(["ws://localhost:8008"])
 
   const titleMap = new Map();
   titleMap.set("/", "Nostr Badger");

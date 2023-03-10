@@ -17,6 +17,7 @@ export default function Badges()
     const [relay, setRelay] = useState(getRelayContext().relays.length > 0 ? getRelayContext().relays[0] : "");
     const relays = getRelayContext().relays;
     const setRelays = getRelayContext().setRelays;
+    const [hasProvider, setHasProvider] = useState(true);
 
     const pool = useRef<nostr.SimplePool | null>(null);
 
@@ -123,6 +124,28 @@ export default function Badges()
         if (e.target.id == "publicKey") setPublicKey((prevState) => (e.target.value));
     };
 
+    const loadPublicKey = async () =>
+    {
+        if ((window as any).nostr)
+        {
+            try{ 
+                const publicKey = await (window as any).nostr.getPublicKey();
+                setPublicKey(publicKey);
+            }
+            catch (error)
+            {
+                setHasProvider(false);
+                console.log(error);
+                return;
+            }
+            setHasProvider(true);
+
+        }
+        else{
+            setHasProvider(false);
+        }
+    }
+
     const getBadges = async (pRelay?: string) =>
     {
         if(!pRelay)
@@ -176,9 +199,11 @@ export default function Badges()
     };
 
     return (
-        <Box  display='flex' flexDirection='column' alignItems='center'>
+        <>
+        <Box  display='flex' flexDirection='column' alignItems='center' justifyContent='bottom'>
+   
             <Grid container spacing={1} maxWidth='md'>
-                <Grid item xs={12}>
+                <Grid item xs={9}>
                     <TextField
                         required
                         id="relay"
@@ -189,7 +214,10 @@ export default function Badges()
                         onChange={handleChange}
                     />
                 </Grid>
-                <Grid item xs={12} >
+                <Grid item xs={3}>
+
+                </Grid>
+                <Grid item xs={9} >
                     <TextField
                         id="publicKey"
                         label="Public Key"
@@ -199,6 +227,16 @@ export default function Badges()
                         helperText={"hexcode or npub..."}
                         onChange={handleChange}
                     />
+                </Grid>
+                <Grid item xs={3}>
+                    <Box height={1} display='flex' flexDirection='column' justifyContent='flex-end' alignContent='center'>
+                        <Button variant='outlined' onClick={(e) => loadPublicKey() }>
+                            My Pubkey
+                        </Button>
+                        { hasProvider ? <Box sx={{ height: "20px" }}>&nbsp;</Box> : 
+                        <Typography height='120px6px' align='center' color='red'>requires extension</Typography> }
+                    </Box>
+                    
                 </Grid>
                 
             </Grid>
@@ -217,6 +255,7 @@ export default function Badges()
                     <Typography>{mesg}</Typography>
                 </Box>
             </Dialog>
-        </Box>        
+        </Box>  
+        </>      
     )
 }
